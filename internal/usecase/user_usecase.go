@@ -4,6 +4,7 @@ import (
 	"context"
 	"ewallet-service/internal/model"
 	"ewallet-service/internal/repository"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,6 +18,15 @@ func NewUserUsecase(repo *repository.UserRepository) *UserUsecase {
 }
 
 func (u *UserUsecase) Register(ctx context.Context, req model.RegisterRequest) (model.RegisterResponse, error) {
+	// check duplicate email
+	emailExists, err := u.UserRepo.EmailExists(ctx, req.Email)
+	if err != nil {
+		return model.RegisterResponse{}, err
+	}
+	if emailExists {
+		return model.RegisterResponse{}, fmt.Errorf("Email %s sudah terdaftar", req.Email)
+	}
+
 	// hash password
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {

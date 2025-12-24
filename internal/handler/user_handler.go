@@ -21,21 +21,28 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 	// validation input json
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		c.JSON(http.StatusBadRequest, WebResponse{
+			Status:  "fail",
+			Message: "Input tidak valid",
+			Error:   err.Error(),
+		})
 		return
 	}
 
 	// c.Request.Context() penting untuk meneruskan context (timeout/cancellation)
 	res, err := h.UserUsecase.Register(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		c.JSON(http.StatusConflict, WebResponse{
+			Status:  "error",
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// response success
-	c.JSON(http.StatusCreated, gin.H{
-		"status":  "success",
-		"message": "User registered successfully",
-		"data":    res,
+	c.JSON(http.StatusCreated, WebResponse{
+		Status:  "success",
+		Message: "User registered successfully",
+		Data:    res,
 	})
 }

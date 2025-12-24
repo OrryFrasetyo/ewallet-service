@@ -56,9 +56,23 @@ func (r *UserRepository) RegisterUser(ctx context.Context, user *model.User) (mo
 
 }
 
-func (r *UserRepository) EmailExists(ctx context.Context, email string) (bool, error)  {
+func (r *UserRepository) EmailExists(ctx context.Context, email string) (bool, error) {
 	var exists bool
 	query := "SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)"
 	err := r.DB.QueryRowContext(ctx, query, email).Scan(&exists)
 	return exists, err
+}
+
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	query := "SELECT id, name, email, password FROM users WHERE email=$1"
+
+	var user model.User
+
+	err := r.DB.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

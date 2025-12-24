@@ -33,3 +33,14 @@ type RegisterResponse struct {
 	WalletNumber string  `json:"wallet_number"`
 	Balance      float64 `json:"balance"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	AccessToken string `json:"access_token"`
+	Type        string `json:"token_type"`
+	ExpiresIn   string  `json:"expires_in"` 
+}

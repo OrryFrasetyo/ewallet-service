@@ -46,3 +46,30 @@ func (h *UserHandler) Register(c *gin.Context) {
 		Data:    res,
 	})
 }
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var req model.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, WebResponse{
+			Status:  "fail",
+			Message: "Input tidak valid",
+			Error:   err.Error(),
+		})
+	}
+
+	res, err := h.UserUsecase.Login(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, WebResponse{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, WebResponse{
+		Status:  "success",
+		Message: "Login berhasil",
+		Data:    res,
+	})
+}

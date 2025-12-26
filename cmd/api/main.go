@@ -3,6 +3,7 @@ package main
 import (
 	"ewallet-service/config"
 	"ewallet-service/internal/handler"
+	"ewallet-service/internal/middleware"
 	"ewallet-service/internal/repository"
 	"ewallet-service/internal/usecase"
 
@@ -12,10 +13,15 @@ import (
 func main() {
 	config.ConnectDB()
 
-	// setup layers (dependency injection)
+	// DI User
 	userRepo := repository.NewUserRepository(config.DB)
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	userHandler := handler.NewUserHandler(userUsecase)
+
+	// DI Transaction
+	trxRepo := repository.NewTransactionRepository(config.DB)
+	trxUsecase := usecase.NewTransactionUsecase(trxRepo)
+	trxHandler := handler.NewTransactionHandler(trxUsecase)
 
 	r := gin.Default()
 
@@ -23,6 +29,11 @@ func main() {
 	{
 		api.POST("/register", userHandler.Register)
 		api.POST("/login", userHandler.Login)
+
+		protected := api.Group("/", middleware.AuthMiddleware())
+		{
+			protected.POST("/topup", trxHandler.TopUp)
+		}
 	}
 
 	r.Run(":8080")

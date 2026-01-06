@@ -16,7 +16,7 @@ import (
 func TestTopUp_Success(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.TransactionRepositoryMock)
-	u := usecase.NewTransactionUsecase(mockRepo)
+	u := usecase.NewTransactionUsecase(mockRepo, nil)
 
 	userID := 1
 	req := model.TopUpRequest{
@@ -45,7 +45,7 @@ func TestTopUp_Success(t *testing.T) {
 func TestTransfer_Success(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.TransactionRepositoryMock)
-	u := usecase.NewTransactionUsecase(mockRepo)
+	u := usecase.NewTransactionUsecase(mockRepo, nil)
 
 	senderID := 1
 	req := model.TransferRequest{
@@ -73,7 +73,7 @@ func TestTransfer_Success(t *testing.T) {
 func TestTransfer_Failed_RepoError(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.TransactionRepositoryMock)
-	u := usecase.NewTransactionUsecase(mockRepo)
+	u := usecase.NewTransactionUsecase(mockRepo, nil)
 
 	senderID := 1
 	req := model.TransferRequest{
@@ -98,7 +98,7 @@ func TestTransfer_Failed_RepoError(t *testing.T) {
 func TestGetHistory_Success(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.TransactionRepositoryMock)
-	u := usecase.NewTransactionUsecase(mockRepo)
+	u := usecase.NewTransactionUsecase(mockRepo, nil)
 
 	userID := 1
 
@@ -136,7 +136,7 @@ func TestGetHistory_Success(t *testing.T) {
 func TestGetHistory_Empty(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.TransactionRepositoryMock)
-	u := usecase.NewTransactionUsecase(mockRepo)
+	u := usecase.NewTransactionUsecase(mockRepo, nil)
 
 	userID := 2
 	expectedHistory := []model.Transaction{}

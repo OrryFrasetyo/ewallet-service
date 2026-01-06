@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"ewallet-service/internal/model"
 	"ewallet-service/internal/repository"
@@ -10,15 +11,19 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecase struct {
 	UserRepo repository.UserRepository
+	Redis    *redis.Client
 }
 
-func NewUserUsecase(repo repository.UserRepository) *UserUsecase {
-	return &UserUsecase{UserRepo: repo}
+func NewUserUsecase(repo repository.UserRepository, rdb *redis.Client) *UserUsecase {
+	return &UserUsecase{
+		UserRepo: repo,
+		Redis:    rdb}
 }
 
 func (u *UserUsecase) Register(ctx context.Context, req model.RegisterRequest) (model.RegisterResponse, error) {
@@ -95,5 +100,36 @@ func (u *UserUsecase) Login(ctx context.Context, req model.LoginRequest) (model.
 }
 
 func (u *UserUsecase) GetBalance(ctx context.Context, userID int) (*model.Wallet, error) {
-	return u.UserRepo.FindWalletByUserID(ctx, userID)
+	// key cache
+	cacheKey := fmt.Sprintf("wallet:%d", userID)
+
+	// check redis (cache hit)
+	if u.Redis != nil {
+		val, err := u.Redis.Get(ctx, cacheKey).Result()
+		if err == nil {
+			var cachedWallet model.Wallet
+			err = json.Unmarshal([]byte(val), &cachedWallet)
+			if err == nil {
+				fmt.Println("⚡ Cache Hit! Saldo diambil dari Redis")
+				return &cachedWallet, nil
+			}
+		}
+	}
+
+	// cache miss (take from database)
+	fmt.Println("🐢 Cache Miss. Mengambil saldo dari Database...")
+	wallet, err := u.UserRepo.FindWalletByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// save to redis (set cache)
+	if u.Redis != nil {
+		data, _ := json.Marshal(wallet)
+		err = u.Redis.Set(ctx, cacheKey, data, 5*time.Minute).Err()
+		if err != nil {
+			fmt.Println("⚠️ Gagal menyimpan ke Redis:", err)
+		}
+	}
+	return wallet, nil
 }

@@ -17,7 +17,7 @@ func TestRegister_Success(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.UserRepositoryMock)
 
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	// data dummy
 	req := model.RegisterRequest{
@@ -48,7 +48,7 @@ func TestRegister_Success(t *testing.T) {
 func TestRegister_EmailDuplicate(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.UserRepositoryMock)
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	req := model.RegisterRequest{
 		Name:     "Duplikat",
@@ -70,7 +70,7 @@ func TestRegister_EmailDuplicate(t *testing.T) {
 func TestLogin_Success(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.UserRepositoryMock)
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 
@@ -99,7 +99,7 @@ func TestLogin_Success(t *testing.T) {
 func TestLogin_WrongPassword(t *testing.T) {
 	// arrange
 	mockRepo := new(mocks.UserRepositoryMock)
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("passwordBenar"), bcrypt.DefaultCost)
 
@@ -128,7 +128,7 @@ func TestLogin_WrongPassword(t *testing.T) {
 func TestGetBalance_Success(t *testing.T)  {
 	// arrange
 	mockRepo := new(mocks.UserRepositoryMock)
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	userID := 1
 	expectedWallet := &model.Wallet{
@@ -155,7 +155,7 @@ func TestGetBalance_Success(t *testing.T)  {
 
 func TestGetBalance_Error(t *testing.T)  {
 	mockRepo := new(mocks.UserRepositoryMock)
-	u := usecase.NewUserUsecase(mockRepo)
+	u := usecase.NewUserUsecase(mockRepo, nil)
 
 	userID := 99
 	expectedErr := errors.New("Database connection failed")

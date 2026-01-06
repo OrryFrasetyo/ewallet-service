@@ -12,7 +12,7 @@ import (
 
 var DB *sql.DB
 
-func ConnectDB() {
+func ConnectDB() *sql.DB {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("⚠️  Warning: .env file not found. Using system environment variables.")
@@ -26,16 +26,20 @@ func ConnectDB() {
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 	// open connect (but dont ping)
-	DB, err = sql.Open("pgx", dsn)
+	dbConn, err := sql.Open("pgx", dsn)
 	if err != nil {
 		log.Fatal("Gagal membuka driver DB: ", err)
 	}
 
 	// test connection (ping)
-	err = DB.Ping()
+	err = dbConn.Ping()
 	if err != nil {
 		log.Fatal("Gagal konek ke Database (Cek user/pass/port): ", err)
 	}
 
 	fmt.Println("🚀 Connected to PostgreSQL database successfully!")
+
+	DB = dbConn
+
+	return dbConn
 }

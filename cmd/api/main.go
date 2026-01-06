@@ -11,16 +11,17 @@ import (
 )
 
 func main() {
-	config.ConnectDB()
+	db := config.ConnectDB()
+	rdb := config.ConnectRedis()
 
 	// DI User
-	userRepo := repository.NewUserRepository(config.DB)
-	userUsecase := usecase.NewUserUsecase(userRepo)
+	userRepo := repository.NewUserRepository(db)
+	userUsecase := usecase.NewUserUsecase(userRepo, rdb)
 	userHandler := handler.NewUserHandler(userUsecase)
 
 	// DI Transaction
-	trxRepo := repository.NewTransactionRepository(config.DB)
-	trxUsecase := usecase.NewTransactionUsecase(trxRepo)
+	trxRepo := repository.NewTransactionRepository(db)
+	trxUsecase := usecase.NewTransactionUsecase(trxRepo, rdb)
 	trxHandler := handler.NewTransactionHandler(trxUsecase)
 
 	r := gin.Default()

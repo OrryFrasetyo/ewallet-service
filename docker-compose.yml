@@ -21,6 +21,7 @@ services:
       - '8080:8080'
     depends_on:
       - db_system
+      - redis_system
     environment:
       DB_HOST: db_system
       DB_PORT: 5432
@@ -30,6 +31,19 @@ services:
       SERVER_PORT: 8080
       JWT_SECRET: rahasia_super_aman_2026
       JWT_EXP: 24
+      REDIS_HOST: redis_system
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+
+  redis_system:
+    image: redis:7-alpine
+    container_name: ewallet_redis_container
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
 
 volumes:
   postgres_data:
+  redis_data:

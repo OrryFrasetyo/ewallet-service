@@ -44,6 +44,18 @@ services:
     volumes:
       - redis_data:/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ewallet_pgadmin_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - '5050:80'
+    depends_on:
+      - db_system
+
 volumes:
   postgres_data:
   redis_data:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"ewallet-service/internal/model"
 	"ewallet-service/internal/repository"
+	"ewallet-service/internal/service"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
@@ -12,12 +13,14 @@ import (
 type TransactionUsecase struct {
 	TransactionRepo repository.TransactionRepository
 	Redis           *redis.Client
+	AIService       *service.AIService
 }
 
-func NewTransactionUsecase(repo repository.TransactionRepository, rdb *redis.Client) *TransactionUsecase {
+func NewTransactionUsecase(repo repository.TransactionRepository, rdb *redis.Client, ai *service.AIService) *TransactionUsecase {
 	return &TransactionUsecase{
 		TransactionRepo: repo,
 		Redis:           rdb,
+		AIService:       ai,
 	}
 }
 
@@ -57,4 +60,32 @@ func (u *TransactionUsecase) Transfer(ctx context.Context, senderID int, req mod
 
 func (u *TransactionUsecase) GetHistory(ctx context.Context, userID int) ([]model.Transaction, error) {
 	return u.TransactionRepo.GetTransactionHistory(ctx, userID)
+}
+
+func (u *TransactionUsecase) AnalyzeFinancialHealth(ctx context.Context, userID int) (string, error) {
+	transactions, err := u.TransactionRepo.GetTransactionHistory(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	if len(transactions) == 0 {
+		return "Belum ada data transaksi untuk dianalisa.", nil
+	}
+
+	var historyText string
+	for _, t := range transactions {
+		historyText += fmt.Sprintf("- %s: %s Rp %.2f (%s)\n",
+			t.CreatedAt.Format("2006-01-02"),
+			t.TransactionType,
+			t.Amount,
+			t.Description,
+		)
+	}
+
+	analysis, err := u.AIService.AnalyzeFinancialHealth(ctx, historyText)
+	if err != nil {
+		return "", err
+	}
+
+	return analysis, nil
 }

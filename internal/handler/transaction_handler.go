@@ -114,3 +114,31 @@ func (h *TransactionHandler) HistoryTransaction(c *gin.Context) {
 	})
 
 }
+
+func (h *TransactionHandler) GetFinancialHealth(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, WebResponse{
+			Status:  "fail",
+			Message: "Unauthorized",
+		})
+		return
+	}
+
+	anaysis, err := h.TransactionUsecase.AnalyzeFinancialHealth(c.Request.Context(), userID.(int))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, WebResponse{
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, WebResponse{
+		Status:  "success",
+		Message: "Analisa Keuangan AI Berhasil",
+		Data: map[string]string{
+			"analysis": anaysis,
+		},
+	})
+}

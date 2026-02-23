@@ -34,6 +34,7 @@ services:
       REDIS_HOST: redis_system
       REDIS_PORT: 6379
       REDIS_PASSWORD: ''
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
 
   redis_system:
     image: redis:7-alpine
